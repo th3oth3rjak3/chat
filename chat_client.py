@@ -54,8 +54,12 @@ class ChatClient:
                     print(f"\n-X {port} is not valid. Please try again.\n")
 
     def get_server_ip_address(self) -> None:
-        self._server_ip_address = input(
+        response = input(
             f"-> Please enter {self._friends_name}'s IP Address: ")
+        if (response.lower() == "localhost"):
+            self._server_ip_address = gethostbyname(gethostname())
+        else:
+            self._server_ip_address = response
 
     def get_server_port(self) -> None:
 

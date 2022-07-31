@@ -81,8 +81,12 @@ class ChatServer:
                     print(f"\n-X {port} is not valid. Please try again.\n")
 
     def get_client_ip_address(self) -> None:
-        self._client_addr = input(
+        response = input(
             f"-> Please enter {self._friends_name}'s IP Address: ")
+        if (response.lower() == "localhost"):
+            self._client_addr = gethostbyname(gethostname())
+        else:
+            self._client_addr = response
 
     def get_user_message(self) -> str:
         """This method gets the text from the user."""
