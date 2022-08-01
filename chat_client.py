@@ -138,24 +138,24 @@ class ChatClient:
             while (response is None):
                 response = self._socket.recv(self.BUFFER_SIZE)
             response = bytes.decode(response)
-            
+
             # Check if it's a /q quit message.
             if (self.should_quit(response)):
                 print(f"-> {self._friends_name} closed the connection...")
                 self._socket.close()
                 quit()
-            
+
             # If not, print the message to the screen.
             print(f"{self._friends_name} ({self._server_ip_address}:" +
                   f"{self._server_port}): {response}")
-        
+
         except Exception as err:
             print("-X Error processing received message.")
             print(f"-X Error: {err}")
 
     def close_chat(self) -> None:
         """Closes the socket connection and quits."""
-        
+
         print(f"\n-> Disconnecting from {self._friends_name}...")
         try:
             self.send_message("/q")

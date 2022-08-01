@@ -141,30 +141,30 @@ class ChatServer:
         """Waits until a response is received."""
 
         try:
-            
+
             # Get a response and decode the byte string.
             response = self._socket.recv(self.BUFFER_SIZE)
             while (response is None):
                 response = self._socket.recv(self.BUFFER_SIZE)
             response = bytes.decode(response)
-            
+
             # If it's a /q quit message, go ahead and quit.
             if (self.should_quit(response)):
                 print(f"-> {self._friends_name} closed the connection...")
                 self._socket.close()
                 quit()
-            
+
             # Otherwise, print the message to the screen.
             print(f"\n{self._friends_name} ({self._client_addr}:" +
                   f"{self._client_port}): {response}")
-        
+
         except Exception as err:
             print("-X Error processing received message.")
             print(f"-X Error: {err}")
 
     def close_chat(self) -> None:
         """Closes the socket connection and quits."""
-        
+
         print(f"\n-> Disconnecting from {self._friends_name}...")
         try:
             self.send_message("/q")
