@@ -8,8 +8,7 @@ References:
 -> https://docs.python.org/3/tutorial/errors.html#exceptions
 """
 
-from socket import (socket, AF_INET, SOCK_STREAM,
-                    gethostbyname, gethostname)
+from socket import socket, AF_INET, SOCK_STREAM, gethostbyname, gethostname
 
 
 # Create a Client class with methods to handle communications
@@ -30,14 +29,19 @@ class ChatServer:
         self._friends_name = ""
 
     def introduce(self) -> None:
+        """Introduces the chat application and gets display names"""
+
         print("**********************************************")
         print("*               Welcome to Chat              *")
         print("**********************************************\n")
+
+        # Collect display names for use in the print statements.
         self._user_name = input("-> What is your name? ")
         self._friends_name = input(
             "-> What is the name of the " + "person you wish to chat with? ")
 
     def get_client_port(self) -> None:
+        """Gets the port number for client side of the connection."""
 
         response = input(
             f"-> Would you like to use {self._friends_name}'s" +
@@ -50,6 +54,8 @@ class ChatServer:
                 port = input(
                     f"-> Please enter {self._friends_name}'s" +
                     " port (5000 - 8000): ")
+
+                # Check for validity
                 valid = (port.isnumeric() and int(port) >= 5000
                          and int(port) <= 8000)
                 valid = valid and (
@@ -63,26 +69,33 @@ class ChatServer:
                         f"port {port}. Please try again.\n")
 
     def get_server_port(self) -> None:
-        while (self._server_port is None):
-            response = input(
-                "-> Would you like to use your default port? ").lower()
-            default = response == "y" or response == "yes"
-            if (default):
-                self._server_port = 5000
-            else:
+        """Gets the port number for the server side of the socket connection"""
+
+        # See if user wants to use defaults, otherwise collect.
+        response = input(
+            "-> Would you like to use your default port? ").lower()
+        default = response == "y" or response == "yes"
+        if (default):
+            self._server_port = 5000
+        else:
+            while (self._server_port is None):
                 port = input("-> Enter your port (5000 - 8000): ")
+
                 # Check for validity
                 valid = (port.isnumeric() and int(port) >= 5000
                          and int(port) <= 8000)
-
                 if (valid):
                     self._server_port = int(port)
                 else:
                     print(f"\n-X {port} is not valid. Please try again.\n")
 
     def get_client_ip_address(self) -> None:
+        """Gets the client IP address from user input."""
+
         response = input(
             f"-> Please enter {self._friends_name}'s IP Address: ")
+
+        # If localhost, return user's actual IP address.
         if (response.lower() == "localhost"):
             self._client_addr = gethostbyname(gethostname())
         else:
@@ -122,34 +135,44 @@ class ChatServer:
         try:
             self._socket.sendall(str.encode(message))
         except Exception as err:
-            print(f"Bad stuff happened: {err}")
+            print(f"-X Error sending message: {err}")
 
     def receive_message(self) -> None:
-        """Waits until the server sends a response."""
+        """Waits until a response is received."""
 
         try:
+            
+            # Get a response and decode the byte string.
             response = self._socket.recv(self.BUFFER_SIZE)
             while (response is None):
                 response = self._socket.recv(self.BUFFER_SIZE)
             response = bytes.decode(response)
+            
+            # If it's a /q quit message, go ahead and quit.
             if (self.should_quit(response)):
                 print(f"-> {self._friends_name} closed the connection...")
                 self._socket.close()
                 quit()
+            
+            # Otherwise, print the message to the screen.
             print(f"\n{self._friends_name} ({self._client_addr}:" +
                   f"{self._client_port}): {response}")
-        except Exception:
-            print("Error")
+        
+        except Exception as err:
+            print("-X Error processing received message.")
+            print(f"-X Error: {err}")
 
     def close_chat(self) -> None:
         """Closes the socket connection and quits."""
+        
         print(f"\n-> Disconnecting from {self._friends_name}...")
         try:
             self.send_message("/q")
             self._socket.close()
             print("-> Thanks for chatting! Come back soon!")
-        except Exception:
-            print("Bad stuff happened...")
+        except Exception as err:
+            print("-X Error closing the chat.")
+            print(f"-X Error: {err}")
 
     def should_quit(self, message: str) -> bool:
         """This method checks for a '/q' message before sending."""
